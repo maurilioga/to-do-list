@@ -1,5 +1,6 @@
 package br.com.estudos.to_do_list.service;
 
+import br.com.estudos.to_do_list.dto.AtualizaTarefaDTO;
 import br.com.estudos.to_do_list.dto.CadastroTarefaDTO;
 import br.com.estudos.to_do_list.dto.DetalhamentoTarefaDTO;
 import br.com.estudos.to_do_list.model.Tarefa;
@@ -29,4 +30,28 @@ public class TarefaService {
 
         return new DetalhamentoTarefaDTO(tarefa);
     }
+
+    public Tarefa atualizarTarefa(AtualizaTarefaDTO atualizaTarefaDTO) {
+
+        Tarefa tarefa = tarefaRepository.getReferenceById(atualizaTarefaDTO.id());
+        tarefa.atualizar(atualizaTarefaDTO);
+
+        return tarefa;
+    }
+
+    public Tarefa concluirTarefa(Long id) {
+
+        Tarefa tarefa = tarefaRepository.getReferenceById(id);
+        tarefa.concluir();
+
+        return tarefa;
+    }
+
+    public void excluirTarefa(Long id) {
+
+        Tarefa tarefa = tarefaRepository.getReferenceById(id);
+        tarefa.excluir();
+    }
+
+
 }
