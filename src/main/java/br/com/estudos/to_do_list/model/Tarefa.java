@@ -40,7 +40,10 @@ public class Tarefa {
 
     private Boolean ativa;
 
-    public Tarefa(CadastroTarefaDTO dto) {
+    @ManyToOne
+    private Usuario usuario;
+
+    public Tarefa(CadastroTarefaDTO dto, Usuario usuario) {
         this.nome = dto.nome();
         this.descricao = dto.descricao();
         this.status = StatusTarefa.PENDENTE;
@@ -48,6 +51,7 @@ public class Tarefa {
         this.prazoFinal = dto.prazoFinal();
         this.dataCriacao = LocalDateTime.now();
         this.ativa = true;
+        this.usuario = usuario;
     }
 
     public void atualizar(AtualizaTarefaDTO atualizaTarefaDTO) {

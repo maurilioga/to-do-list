@@ -27,11 +27,9 @@ public class FilterConfiguration extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String tokenJWT = requestToken(request);
+        if (request.getHeader("Authorization") != null) {
 
-        if (tokenJWT != null) {
-
-            String subject = tokenService.getSubject(tokenJWT);
+            String subject = tokenService.getSubject(request.getHeader("Authorization"));
             UserDetails usuario = usuarioRepository.findByLoginIgnoreCase(subject);
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
@@ -41,13 +39,4 @@ public class FilterConfiguration extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String requestToken(HttpServletRequest request) {
-
-        String authorization = request.getHeader("Authorization");
-        if (authorization != null) {
-            return authorization.replace("Bearer ", "");
-        }
-
-        return null;
-    }
 }

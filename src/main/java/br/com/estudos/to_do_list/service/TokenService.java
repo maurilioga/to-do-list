@@ -36,12 +36,14 @@ public class TokenService {
 
     public String getSubject(String tokenJWT) {
 
+        String token = tokenJWT.replace("Bearer ", "");
+
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
                     .withIssuer(ISSUER)
                     .build()
-                    .verify(tokenJWT)
+                    .verify(token)
                     .getSubject();
         } catch (JWTVerificationException ex) {
             throw new RuntimeException("Token inválido!");

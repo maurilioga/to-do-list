@@ -33,6 +33,9 @@ public class Usuario implements UserDetails {
 
     private LocalDateTime dataCriacao;
 
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    private List<Tarefa> tarefaList = new ArrayList<>();
+
     public Usuario(String login, String senha) {
         this.login = login;
         this.senha = senha;

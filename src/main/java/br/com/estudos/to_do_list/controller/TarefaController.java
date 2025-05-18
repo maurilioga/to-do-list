@@ -6,6 +6,7 @@ import br.com.estudos.to_do_list.dto.DetalhamentoTarefaDTO;
 import br.com.estudos.to_do_list.model.Tarefa;
 import br.com.estudos.to_do_list.repository.TarefaRepository;
 import br.com.estudos.to_do_list.service.TarefaService;
+import br.com.estudos.to_do_list.service.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,11 +27,16 @@ public class TarefaController {
     @Autowired
     private TarefaRepository tarefaRepository;
 
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping
     @Transactional
-    public ResponseEntity cadastrarTarefa(@RequestBody @Valid CadastroTarefaDTO cadastroTarefaDTO, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity cadastrarTarefa(@RequestBody @Valid CadastroTarefaDTO cadastroTarefaDTO, @RequestHeader String authorization, UriComponentsBuilder uriBuilder) {
 
-        DetalhamentoTarefaDTO detalhamentoTarefaDTO = tarefaService.cadastrarTarefa(cadastroTarefaDTO);
+        String login = tokenService.getSubject(authorization);
+
+        DetalhamentoTarefaDTO detalhamentoTarefaDTO = tarefaService.cadastrarTarefa(cadastroTarefaDTO, login);
 
         var uri = uriBuilder.path("/tarefas/{id}").buildAndExpand(detalhamentoTarefaDTO.id()).toUri();
 
@@ -38,44 +44,54 @@ public class TarefaController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<DetalhamentoTarefaDTO>> listarTarefas(@PageableDefault(size = 5, sort = {"prioridade", "prazoFinal"}) Pageable pageable) {
+    public ResponseEntity<Page<DetalhamentoTarefaDTO>> listarTarefas(@PageableDefault(size = 5, sort = {"prioridade", "prazoFinal"}) Pageable pageable, @RequestHeader String authorization) {
 
-        Page<DetalhamentoTarefaDTO> tarefaDTO = tarefaRepository.findAllByAtivaTrue(pageable).map(DetalhamentoTarefaDTO::new);
+        String login = tokenService.getSubject(authorization);
+
+        Page<DetalhamentoTarefaDTO> tarefaDTO = tarefaService.listarTarefas(pageable, login);
 
         return ResponseEntity.ok(tarefaDTO);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DetalhamentoTarefaDTO> buscarTarefa(@PathVariable Long id) {
+    public ResponseEntity<DetalhamentoTarefaDTO> buscarTarefa(@PathVariable Long id, @RequestHeader String authorization) {
 
-        Tarefa tarefa = tarefaRepository.getReferenceById(id);
+        String login = tokenService.getSubject(authorization);
+
+        Tarefa tarefa = tarefaService.buscarTarefa(id, login);
 
         return ResponseEntity.ok(new DetalhamentoTarefaDTO(tarefa));
     }
 
     @PutMapping
     @Transactional
-    public ResponseEntity<DetalhamentoTarefaDTO> atualizarTarefa(@RequestBody AtualizaTarefaDTO atualizaTarefaDTO) {
+    public ResponseEntity<DetalhamentoTarefaDTO> atualizarTarefa(@RequestBody AtualizaTarefaDTO atualizaTarefaDTO, @RequestHeader String authorization) {
 
-        Tarefa tarefa = tarefaService.atualizarTarefa(atualizaTarefaDTO);
+        String login = tokenService.getSubject(authorization);
+
+        Tarefa tarefa = tarefaService.atualizarTarefa(atualizaTarefaDTO, login);
 
         return ResponseEntity.ok(new DetalhamentoTarefaDTO(tarefa));
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity<DetalhamentoTarefaDTO> concluirTarefa(@PathVariable Long id) {
+    public ResponseEntity<DetalhamentoTarefaDTO> concluirTarefa(@PathVariable Long id, @RequestHeader String authorization) {
 
-        Tarefa tarefa = tarefaService.concluirTarefa(id);
+        String login = tokenService.getSubject(authorization);
+
+        Tarefa tarefa = tarefaService.concluirTarefa(id, login);
 
         return ResponseEntity.ok(new DetalhamentoTarefaDTO(tarefa));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity excluirTarefa(@PathVariable Long id) {
+    public ResponseEntity excluirTarefa(@PathVariable Long id, @RequestHeader String authorization) {
 
-        tarefaService.excluirTarefa(id);
+        String login = tokenService.getSubject(authorization);
+
+        tarefaService.excluirTarefa(id, login);
         return ResponseEntity.noContent().build();
     }
 }
